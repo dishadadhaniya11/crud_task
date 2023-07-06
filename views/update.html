@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+         input{
+            padding: 10px 30px ;
+            margin: 10px 0px;
+        }
+        button{
+            background-color: green;
+            padding: 10px 30px;
+            font-size: 15px;
+            color:white;
+        }
+    </style>
+</head>
+<body>
+   <center>
+    <div>
+        <h1>Update user</h1>
+        <div>
+            <input type="text" placeholder="Fullname" id="fullname"/><br>
+            <input type="email" placeholder="Email" id="email"/><br>
+            <input type="text" placeholder="PhoneNumber" id="phone"/><br>
+            <button id="submit" type="button" onclick="updateData()">Update</button>
+        </div>
+        
+    </div>
+   </center>
+
+   <script>
+
+    const getUpdateData = async () => {
+        try {
+            const id = window.location.search.split("?id=")[1]
+            let result = await fetch(`http://localhost:6200/user/${id}`)
+            if(result !== 200){
+                result  = await result.json()
+                document.getElementById("fullname").value = result.user.fullname
+                document.getElementById("email").value = result.user.email
+                document.getElementById("phone").value = result.user.phone
+                return
+            }else{
+                result = await result.json()
+                alert(result.message)
+                return
+            }
+        } catch (error) {
+            alert(error.message)
+        }
+    }
+   getUpdateData()
+
+   const updateData = async() => {
+    try {
+        const data = {
+            fullname:document.getElementById("fullname").value,
+            email:document.getElementById("email").value,
+            phone:document.getElementById("phone").value
+        }
+
+        if(! data.fullname) return alert("Require feild Fullname is empty")
+        if(! data.email) return alert("Require feild Email is empty")
+        if(! data.phone) return alert("Require feild Phone id empty")
+
+        let options = {
+            method: "PUT",
+            headers:{
+                "Content-type" : "application/json",
+            },
+            body: JSON.stringify(data)
+        }
+
+        const id = window.location.search.split("?id=")[1]
+        let result = await fetch(`http://localhost:6200/update/user/${id}`, options)
+        if(result.status === 200){
+            result = await result.json()
+            window.location.href = "http://localhost:6200/view/app.html"
+        }else{
+            result = await result.json()
+            return alert(result.message)
+        }
+    } catch (error) {
+        return alert(error.message)
+    }
+   }
+   </script>
+</body>
+</html>

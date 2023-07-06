@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>crud task</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid gray;
+            /* border-collapse: collapse;  */
+        }
+
+        th,
+        td {
+            padding: 1.5rem;
+        }
+        input{
+            padding: 10px 30px ;
+            margin: 10px 0px;
+        }
+        button{
+            background-color: blueviolet;
+            padding: 10px 30px;
+            font-size: 15px;
+            color:white;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <center>
+        <h2>Add User</h2>
+        <div>
+            <input type="text" placeholder="Fullname" id="fullname"/><br>
+            <input type="email" placeholder="Email" id="email"/><br>
+            <input type="text" placeholder="PhoneNumber" id="phone"/><br>
+            <button id="submit" type="submit">Submit</button>
+        </div>
+        
+
+    </center><br><br>
+
+
+    <center>
+        <table class="tbl">
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Created at</th>
+                <th>Actions</th>
+            </tr>
+        </table>
+    </center>
+
+
+    <script>
+
+
+        const btn = document.getElementById("submit")
+
+        const addUser = async () => {
+            try {
+                const data = {
+                    fullname: document.getElementById("fullname").value,
+                    email:document.getElementById("email").value,
+                    phone:document.getElementById("phone").value
+
+                }
+                if(!data.fullname) return alert("Required feild Fullname is empty")
+                if(!data.email) return alert("Required feild email is empty")
+                if(!data.phone) return alert("Required feild phone is empty")
+
+                let options = {
+                    method:"POST",
+                    headers:{
+                        "Content-Type" : "application/json"
+                    },
+                    body:JSON.stringify(data)
+                }
+
+                 let res = await fetch("http://localhost:6200/user",options)
+                 if(res.status === 200){
+                    res = await res.json()
+                    getdata()
+                 }else{
+                    res = await res.json()
+                    return alert(res.message)
+                 }
+            } catch (error) {
+                return alert(error.message)
+            }
+        }
+
+        btn.addEventListener("click",addUser)
+
+
+        const removeData = async (e) => {
+            try {
+
+                const Confirm = window.confirm("Are you sure to delete this user")
+                
+                if(!Confirm) return
+
+                let id = e.target.id.split("_")[1]
+                let options = {
+                    method: "DELETE",
+
+                } 
+                let url = `http://localhost:6200/user/${id}`
+                let result = await fetch(url, options)
+                if(result.status === 200){
+                    result = await result.json()
+                    window.location.reload()
+                }else{
+                    result = await result.json()
+                    return alert(result.message)
+                }
+            } catch (error) {
+                return alert(error.message)
+            }
+        }
+
+        const ClickOnUpdate = async () => {
+            try {
+              
+            } catch (error) {
+                
+            } 
+        }
+        
+
+function showData(data) {
+    let i = 0
+    let tbl = document.querySelector(".tbl")
+    while (i < data.length) {
+        let tr = document.getElementById(data[i]._id)
+        if(tr){
+            tr.remove()
+        }
+
+        tr = document.createElement("tr")
+        tr.id = data[i]._id
+        let fullname = document.createElement("td")
+        let email = document.createElement("td")
+        let phone = document.createElement("td")
+        let createdat = document.createElement("td") 
+        let actions = document.createElement("td")
+        actions.style.display = "flex"
+        actions.style.gap = "1rem"
+        let remove = document.createElement("button")
+        remove.innerText = "Delete"
+        remove.style.color="white"
+        remove.style.background = "red"
+        remove.id = `rm_${data[i]._id}`
+        let update = document.createElement("button")
+        update.innerText = "Update"
+        update.style.color = "white"
+        update.style.background = "green"
+        update.id = `up_${data[i]._id}`
+
+
+        remove.addEventListener("click",removeData)
+
+        // update.addEventListener("click",ClickOnUpdate)
+
+        update.addEventListener("click",(e)=>{
+            let id = e.target.id.split("_")[1]
+            window.location.href = `http://localhost:6200/view/update.html?id=${id}`
+
+        } )
+
+       
+        fullname.innerText = data[i].fullname
+        email.innerText = data[i].email
+        phone.innerText = data[i].phone
+        let date = new Date(data[i].createdAt) 
+        createdat.innerText = date.toDateString()
+
+
+        actions.appendChild(update)
+        actions.appendChild(remove)
+       
+        tbl.appendChild(tr)
+        tr.appendChild(fullname)
+        tr.appendChild(email)
+        tr.appendChild(phone)
+        tr.appendChild(createdat)
+        tr.appendChild(actions)
+
+        i++
+        
+    }
+    
+}
+
+        const getdata = async () => {
+            try {
+                let result = await fetch("http://localhost:6200/user")
+                if (result.status === 200) {
+                    result = await result.json()
+                    showData(result.users)
+                }
+    
+            } catch (error) {
+                alert(error.message)
+            }
+        }
+        getdata()
+    </script>
+
+</body>
+
+</html>
